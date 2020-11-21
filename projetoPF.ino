@@ -7,6 +7,7 @@
 #include "Credentials.h"
 #include "Setting.h"
 #include "Paths.h"
+#include "Temperature.h"
 
 OneWire oneWire(2);
 DallasTemperature sensor(&oneWire);
@@ -14,6 +15,10 @@ DallasTemperature sensor(&oneWire);
 Setting setting;
 Paths paths;
 Credentials credentials;
+Temperature temperature;
+
+unsigned long currentMillis = 0;
+unsigned long counterMillisToUpdateTemperature = 0;
 
 void setup()
 {
@@ -26,6 +31,9 @@ void setup()
     sensor.begin();
 
     readingSettingsValuesFirebase();
+    temperature.updateTemperatures(readTemperature());
+
+    Firebase.stream("/");
 }
 
 void loop()
@@ -36,7 +44,37 @@ void loop()
         wifiConnect();
     }
 
-    Serial.println(readTemperature());
+    currentMillis = millis();
+
+    if (Firebase.failed())
+    {
+        Serial.println("Streaming error");
+        Serial.println(Firebase.error());
+        return;
+    }
+    checkUpdateTemperaturePeriod();
+
+    if (Firebase.available())
+    {
+        FirebaseObject event = Firebase.readEvent();
+        String eventType = event.getString("type");
+        eventType.toLowerCase();
+        //     Serial.print("Evento: ");
+        //     Serial.println(eventType);
+
+        if (eventType == "patch")
+        {
+            String path = event.getString("path");
+            Serial.print("Endereco: ");
+            Serial.println(path);
+
+            if (path == "/CheckTemperature")
+                checkUpdateTemperatureRequested();
+
+            else if (path == "/Settings")
+                readingSettingsValuesFirebase();
+        }
+    }
 }
 
 void wifiConnect()
@@ -64,6 +102,8 @@ void readingSettingsValuesFirebase()
     setting.setTemperatureToAlert(Firebase.getFloat(paths.SETTINGS_TEMPERATURE_TO_ALERT));
     setting.setEmailToAlert(Firebase.getString(paths.EMAIL_TO_ALERT));
 
+    calculateHourlyTemperatureReadings(setting.getIntervalToUpdateTemperature());
+
     Serial.println("CONFIGURACOES: ");
     Serial.print("Intervalo: ");
     Serial.println(setting.getIntervalToUpdateTemperature());
@@ -71,4 +111,31 @@ void readingSettingsValuesFirebase()
     Serial.println(setting.getTemperatureToAlert());
     Serial.print("Email para envio: ");
     Serial.println(setting.getEmailToAlert());
+    Serial.print("Leitura por hora: ");
+    Serial.println(temperature.getHourlyTemperatureReadings());
+}
+
+void calculateHourlyTemperatureReadings(int interval)
+{
+    temperature.setHourlyTemperatureReadings((60 / interval));
+    //caso tenha algum erro de validacao no front, pois o maximo de leituras por hora definido é de 30
+    if (temperature.getHourlyTemperatureReadings() > temperature.maximumReadingsPerHour)
+        temperature.setHourlyTemperatureReadings(temperature.maximumReadingsPerHour);
+}
+
+void checkUpdateTemperaturePeriod()
+{
+    if ((currentMillis - counterMillisToUpdateTemperature) >= (setting.getIntervalToUpdateTemperature() * 60000))
+    {
+        counterMillisToUpdateTemperature = currentMillis;
+        temperature.updateTemperatures(readTemperature());
+        Serial.println("Atualizou temperatura automaticamente de acordo com o tempo definido");
+    }
+}
+
+void checkUpdateTemperatureRequested()
+{
+    Firebase.setBool(paths.CHECK_TEMPERATURE, false);
+    temperature.updateTemperatures(readTemperature());
+    Serial.println("Atualizou temperatura conforme solicitado");
 }
