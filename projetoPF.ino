@@ -33,8 +33,10 @@ void loop()
     if (!WiFi.isConnected())
     {
         Serial.println("Desconectado, reconectando...");
-        WiFi.reconnect();
+        wifiConnect();
     }
+
+    Serial.println(readTemperature());
 }
 
 void wifiConnect()
