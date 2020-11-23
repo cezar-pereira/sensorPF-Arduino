@@ -17,7 +17,6 @@ Paths paths;
 Credentials credentials;
 Temperature temperature;
 
-unsigned long currentMillis = 0;
 unsigned long counterMillisToUpdateTemperature = 0;
 
 void setup()
@@ -44,15 +43,12 @@ void loop()
         wifiConnect();
     }
 
-    currentMillis = millis();
-
     if (Firebase.failed())
     {
         Serial.println("Streaming error");
         Serial.println(Firebase.error());
         return;
     }
-    checkUpdateTemperaturePeriod();
 
     if (Firebase.available())
     {
@@ -77,6 +73,8 @@ void loop()
                 clearDatas();
         }
     }
+
+    checkUpdateTemperaturePeriod();
 }
 
 void wifiConnect()
@@ -127,9 +125,13 @@ void calculateHourlyTemperatureReadings(int interval)
 
 void checkUpdateTemperaturePeriod()
 {
-    if ((currentMillis - counterMillisToUpdateTemperature) >= (setting.getIntervalToUpdateTemperature() * 60000))
+
+    if (counterMillisToUpdateTemperature > millis())
+        counterMillisToUpdateTemperature = millis();
+
+    if ((millis() - counterMillisToUpdateTemperature) >= (setting.getIntervalToUpdateTemperature() * 60000))
     {
-        counterMillisToUpdateTemperature = currentMillis;
+        counterMillisToUpdateTemperature = millis();
         temperature.updateTemperatures(readTemperature());
         Serial.println("Atualizou temperatura automaticamente de acordo com o tempo definido");
     }
