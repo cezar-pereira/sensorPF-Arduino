@@ -90,8 +90,6 @@ public:
 
         Firebase.setFloat(paths.AVERAGE_TEMPERATURE, averageTemperature);
 
-        Firebase.setBool(paths.CHECK_TEMPERATURE, false); //Adicionada pois as vezes nao seta para false ao chamar funcao checkUpdateTemperatureRequested
-
         readingCount++;
 
         //DEPURACAO
@@ -117,5 +115,25 @@ public:
     int getHourlyTemperatureReadings()
     {
         return hourlyTemperatureReadings;
+    }
+
+    void setReadingCount(int value)
+    {
+        readingCount = value;
+    }
+
+    void setMinimumTemperature(float value)
+    {
+        minimumTemperature = 0;
+    }
+
+    void setMaximumTemperature(float value)
+    {
+        maximumTemperature = 0;
+    }
+
+    void setRealTemperature(float value)
+    {
+        realTemperature = 0;
     }
 };

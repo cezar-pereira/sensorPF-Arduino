@@ -73,6 +73,8 @@ void loop()
 
             else if (path == "/Settings")
                 readingSettingsValuesFirebase();
+            else if (path == "/Temperatures")
+                clearDatas();
         }
     }
 }
@@ -135,7 +137,16 @@ void checkUpdateTemperaturePeriod()
 
 void checkUpdateTemperatureRequested()
 {
-    Firebase.setBool(paths.CHECK_TEMPERATURE, false);
     temperature.updateTemperatures(readTemperature());
     Serial.println("Atualizou temperatura conforme solicitado");
+    Firebase.setBool(paths.CHECK_TEMPERATURE, false);
+}
+
+void clearDatas()
+{
+    temperature.setMinimumTemperature(0);
+    temperature.setMaximumTemperature(0);
+    temperature.setRealTemperature(0);
+    temperature.setReadingCount(0);
+    temperature.updateTemperatures(readTemperature());
 }
