@@ -1,8 +1,8 @@
-#include <ArduinoJson.h>
-#include <FirebaseArduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <ESP8266WiFi.h>
+
+#include "FirebaseESP8266.h"
 
 #include "Credentials.h"
 #include "Setting.h"
@@ -17,7 +17,14 @@ Paths paths;
 Credentials credentials;
 Temperature temperature;
 
+FirebaseData firebaseDataStream;
+FirebaseData firebaseDataSet;
+FirebaseData firebaseDataGet;
+
 unsigned long counterMillisToUpdateTemperature = 0;
+
+unsigned long antiFloodFirebaseCheckTemperature = 0;
+int intervalAntiFloodFirebaseCheckTemperature = 30; //seconds
 
 void setup()
 {
@@ -26,57 +33,57 @@ void setup()
     wifiConnect();
 
     Firebase.begin(credentials.FIREBASE_HOST, credentials.FIREBASE_AUTH);
+    Firebase.reconnectWiFi(true);
+
+    if (!Firebase.beginStream(firebaseDataStream, paths.PATH))
+    {
+        Serial.println("------------------------------------");
+        Serial.println("Can't begin stream connection...");
+        Serial.println("REASON: " + firebaseDataStream.errorReason());
+        Serial.println("------------------------------------");
+        Serial.println();
+    }
+
+    Firebase.setBool(firebaseDataSet, paths.CHECK_TEMPERATURE, false);
 
     sensor.begin();
 
     readingSettingsValuesFirebase();
-    temperature.updateTemperatures(readTemperature());
 
-    Firebase.stream("/");
+    temperature.updateTemperatures(readTemperature());
 }
 
 void loop()
 {
-    if (!WiFi.isConnected())
+    if (!Firebase.readStream(firebaseDataStream))
     {
-        Serial.println("Desconectado, reconectando...");
-        wifiConnect();
-    }
-
-    if (Firebase.failed())
-    {
-        Serial.println("Streaming error");
-        Serial.println(Firebase.error());
+        Serial.println("------------------------------------");
+        Serial.println("Can't read stream data...");
+        Serial.println("REASON: " + firebaseDataStream.errorReason());
+        Serial.println("------------------------------------");
+        Serial.println();
         return;
     }
 
-    if (Firebase.available())
+    if (firebaseDataStream.streamTimeout())
     {
-        FirebaseObject event = Firebase.readEvent();
-        String eventType = event.getString("type");
-        eventType.toLowerCase();
-        //     Serial.print("Evento: ");
-        //     Serial.println(eventType);
-
-        if (eventType == "patch")
-        {
-            String path = event.getString("path");
-            Serial.print("Endereco: ");
-            Serial.println(path);
-
-            if (path == "/CheckTemperature")
-                checkUpdateTemperatureRequested();
-
-            else if (path == "/Settings")
-                readingSettingsValuesFirebase();
-            else if (path == "/Temperatures")
-                clearDatas();
-        }
+        Serial.println("Stream timeout, resume streaming...");
+        Serial.println();
     }
 
+    if (firebaseDataStream.streamAvailable())
+    {
+        Serial.println("STREAM PATH: " + firebaseDataStream.streamPath());
+        Serial.println("EVENT PATH: " + firebaseDataStream.dataPath());
+        Serial.println("DATA TYPE: " + firebaseDataStream.dataType());
+        Serial.println("EVENT TYPE: " + firebaseDataStream.eventType());
+
+        checkUpdateTemperatureRequested();
+        readingSettingsValuesFirebase();
+    }
+    checkTemperature();
     checkUpdateTemperaturePeriod();
 }
-
 void wifiConnect()
 {
     WiFi.begin(credentials.WIFI_SSID, credentials.WIFI_PASSWORD);
@@ -98,9 +105,21 @@ float readTemperature()
 
 void readingSettingsValuesFirebase()
 {
-    setting.setIntervalToUpdateTemperature(Firebase.getInt(paths.SETTINGS_INTERVAL_TO_UPDATE));
-    setting.setTemperatureToAlert(Firebase.getFloat(paths.SETTINGS_TEMPERATURE_TO_ALERT));
-    setting.setEmailToAlert(Firebase.getString(paths.EMAIL_TO_ALERT));
+    Firebase.getInt(firebaseDataGet, paths.SETTINGS_INTERVAL_TO_UPDATE);
+    if (firebaseDataGet.dataType() == "int")
+        setting.setIntervalToUpdateTemperature(firebaseDataGet.intData());
+
+    Firebase.getFloat(firebaseDataGet, paths.SETTINGS_TEMPERATURE_TO_ALERT);
+    if (firebaseDataGet.dataType() == "float" || firebaseDataGet.dataType() == "int")
+        setting.setTemperatureToAlert(firebaseDataGet.floatData());
+
+    Firebase.getString(firebaseDataGet, paths.EMAIL_TO_ALERT);
+    if (firebaseDataGet.dataType() == "string")
+        setting.setEmailToAlert(firebaseDataGet.stringData());
+
+    Firebase.getString(firebaseDataGet, paths.SENSOR_NAME);
+    if (firebaseDataGet.dataType() == "string")
+        setting.setSensorName(firebaseDataGet.stringData());
 
     calculateHourlyTemperatureReadings(setting.getIntervalToUpdateTemperature());
 
@@ -111,6 +130,8 @@ void readingSettingsValuesFirebase()
     Serial.println(setting.getTemperatureToAlert());
     Serial.print("Email para envio: ");
     Serial.println(setting.getEmailToAlert());
+    Serial.print("Nome do sensor: ");
+    Serial.println(setting.getSensorName());
     Serial.print("Leitura por hora: ");
     Serial.println(temperature.getHourlyTemperatureReadings());
 }
@@ -125,7 +146,6 @@ void calculateHourlyTemperatureReadings(int interval)
 
 void checkUpdateTemperaturePeriod()
 {
-
     if (counterMillisToUpdateTemperature > millis())
         counterMillisToUpdateTemperature = millis();
 
@@ -139,16 +159,24 @@ void checkUpdateTemperaturePeriod()
 
 void checkUpdateTemperatureRequested()
 {
-    temperature.updateTemperatures(readTemperature());
-    Serial.println("Atualizou temperatura conforme solicitado");
-    Firebase.setBool(paths.CHECK_TEMPERATURE, false);
+    Firebase.getBool(firebaseDataGet, paths.CHECK_TEMPERATURE);
+
+    if (firebaseDataGet.boolData())
+    {
+        temperature.updateTemperatures(readTemperature());
+        Serial.println("Atualizou temperatura conforme solicitado");
+        Firebase.setBool(firebaseDataSet, paths.CHECK_TEMPERATURE, false);
+    }
 }
 
-void clearDatas()
+void checkTemperature()
 {
-    temperature.setMinimumTemperature(0);
-    temperature.setMaximumTemperature(0);
-    temperature.setRealTemperature(0);
-    temperature.setReadingCount(0);
-    temperature.updateTemperatures(readTemperature());
+    if (readTemperature() >= setting.getTemperatureToAlert())
+    {
+        if ((millis() - antiFloodFirebaseCheckTemperature) >= (intervalAntiFloodFirebaseCheckTemperature * 1000))
+        {
+            antiFloodFirebaseCheckTemperature = millis();
+            temperature.updateTemperatures(readTemperature());
+        }
+    }
 }

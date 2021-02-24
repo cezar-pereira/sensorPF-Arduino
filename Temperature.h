@@ -1,3 +1,5 @@
+extern FirebaseData firebaseDataSet;
+
 class Temperature
 {
 
@@ -50,22 +52,23 @@ public:
 
         //REAL
         realTemperature = temperature;
-        Firebase.setFloat(paths.REAL_TEMPERATURE, realTemperature);
+
+        Firebase.setFloat(firebaseDataSet, paths.REAL_TEMPERATURE, realTemperature);
         //MINIMUM
         if (realTemperature < minimumTemperature || minimumTemperature == 0)
         {
             minimumTemperature = realTemperature;
-            Firebase.setFloat(paths.MINIMUM_TEMPERATURE, minimumTemperature);
+            Firebase.setFloat(firebaseDataSet, paths.MINIMUM_TEMPERATURE, minimumTemperature);
         }
         //MAXIMUM
         if (realTemperature > maximumTemperature || maximumTemperature == 0)
         {
             maximumTemperature = realTemperature;
-            Firebase.setFloat(paths.MAXIMUM_TEMPERATURE, maximumTemperature);
+            Firebase.setFloat(firebaseDataSet, paths.MAXIMUM_TEMPERATURE, maximumTemperature);
         }
 
         //AVERAGE
-        if (readingCount >= hourlyTemperatureReadings) //readingCount comeca em ZERO
+        if (readingCount >= hourlyTemperatureReadings)
         {
             Serial.println("ENTROU PARA ORGANIZAR");
             readingCount = hourlyTemperatureReadings - 1;
@@ -88,7 +91,7 @@ public:
 
         averageTemperature = calculateAverageTemperature();
 
-        Firebase.setFloat(paths.AVERAGE_TEMPERATURE, averageTemperature);
+        Firebase.setFloat(firebaseDataSet, paths.AVERAGE_TEMPERATURE, averageTemperature);
 
         readingCount++;
 
@@ -135,5 +138,10 @@ public:
     void setRealTemperature(float value)
     {
         realTemperature = 0;
+    }
+
+    float getRealTemperature()
+    {
+        return realTemperature;
     }
 };

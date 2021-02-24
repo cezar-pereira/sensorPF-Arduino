@@ -1,9 +1,10 @@
 class Setting
 {
 private:
-    int intervalToUpdateTemperature = 10;           //in minutes - default
-    float temperatureToAlert = 30;                  //default
-    String emailToAlert = "helaniocezar@gmail.com"; //default
+    int intervalToUpdateTemperature = 10; //in minutes
+    float temperatureToAlert = 30;
+    String emailToAlert = "helaniocezar@gmail.com";
+    String sensorName = "Sensor";
 
 public:
     void setIntervalToUpdateTemperature(int value)
@@ -31,5 +32,14 @@ public:
     String getEmailToAlert()
     {
         return emailToAlert;
+    }
+
+    void setSensorName(String value)
+    {
+        sensorName = value;
+    }
+    String getSensorName()
+    {
+        return sensorName;
     }
 };
