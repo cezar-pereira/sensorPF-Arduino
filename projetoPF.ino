@@ -3,11 +3,13 @@
 #include <ESP8266WiFi.h>
 
 #include "FirebaseESP8266.h"
+#include "ESP8266SMTP.h"
 
 #include "Credentials.h"
 #include "Setting.h"
 #include "Paths.h"
 #include "Temperature.h"
+#include "Email.h"
 
 OneWire oneWire(2);
 DallasTemperature sensor(&oneWire);
@@ -16,12 +18,16 @@ Setting setting;
 Paths paths;
 Credentials credentials;
 Temperature temperature;
+Email email;
 
 FirebaseData firebaseDataStream;
 FirebaseData firebaseDataSet;
 FirebaseData firebaseDataGet;
 
 unsigned long counterMillisToUpdateTemperature = 0;
+
+unsigned long antiFloodEmail = 0;
+int intervalAntiFloodEmail = 60; //seconds
 
 unsigned long antiFloodFirebaseCheckTemperature = 0;
 int intervalAntiFloodFirebaseCheckTemperature = 30; //seconds
@@ -177,6 +183,12 @@ void checkTemperature()
         {
             antiFloodFirebaseCheckTemperature = millis();
             temperature.updateTemperatures(readTemperature());
+        }
+
+        if ((millis() - antiFloodEmail) >= (intervalAntiFloodEmail * 1000))
+        {
+            antiFloodEmail = millis();
+            email.sendEmail();
         }
     }
 }
