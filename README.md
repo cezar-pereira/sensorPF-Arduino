@@ -55,9 +55,8 @@ Bibliotecas utilizadas no projeto:
 
 ### ESP8266
 - #### **ESP8266WiFi**  ([ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi))
-### FirebaseArduino
-- #### **FirebaseArduino**  ([FirebaseArduino](https://github.com/FirebaseExtended/firebase-arduino))
-### ArduinoJson
-- #### **ArduinoJson**  ([ArduinoJson](https://github.com/bblanchon/ArduinoJson))
+### Firebase-ESP8266
+- #### **Firebase-ESP8266**  ([Firebase-ESP8266](https://github.com/mobizt/Firebase-ESP8266))
+
 
 
