@@ -10,39 +10,27 @@ class Email
 public:
     bool isPauseFirebaseData = true;
 
-    void setConfigurationSMTP()
-    {
-        char *title = "Alerta De Temperatura sala dos servidores da Policia Federal";
-        char *content = "Sensor De Temperatura";
-        SMTP.setEmail(credentials.EMAIL)
-            .setPassword(credentials.EMAIL_PASSWORD)
-            .Subject(title)
-            .setFrom(content)
-            .setForGmail();
-    }
-
     void sendEmail()
     {
+        EMailSender emailSend(credentials.EMAIL, credentials.EMAIL_PASSWORD);
         Serial.println("Seending E-mail...");
         pauseOrContinueFirebaseData();
-
-        setConfigurationSMTP();
 
         String messageToSent = "Alerta, <strong>" + setting.getSensorName() + "</strong> com temperatura: <h1>";
         messageToSent.concat(temperature.getRealTemperature());
         messageToSent.concat("</h1>");
 
-        if (SMTP.Send(setting.getEmailToAlert(), messageToSent))
-        {
-            Serial.println("Alerta enviado: ");
-            Serial.println(messageToSent);
-        }
-        else
-        {
-            Serial.print("Erro ao enviar e-mail: ");
-            Serial.println(SMTP.getError());
-        }
+        EMailSender::EMailMessage message;
+        message.subject = "teste";
+        message.message = messageToSent;
 
+        EMailSender::Response resp = emailSend.send(setting.getEmailToAlert(), message);
+
+        Serial.println("Sending status: ");
+
+        Serial.println(resp.status);
+        Serial.println(resp.code);
+        Serial.println(resp.desc);
         pauseOrContinueFirebaseData();
     }
 

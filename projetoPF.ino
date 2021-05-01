@@ -2,8 +2,9 @@
 #include <DallasTemperature.h>
 #include <ESP8266WiFi.h>
 
+#include <EMailSender.h>
+
 #include "FirebaseESP8266.h"
-#include "ESP8266SMTP.h"
 
 #include "Credentials.h"
 #include "Setting.h"

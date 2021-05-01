@@ -6,6 +6,7 @@
  <a href="#-sobre-o-projeto">Sobre</a> •
  <a href="#-funcionalidades">Funcionalidades</a> •
  <a href="#-tecnologias">Tecnologias</a> 
+ <a href="#-Bibliotecas">Bibliotecas</a> 
 </p>
 
 
@@ -33,11 +34,11 @@ TempSensor - é um projeto desenvolvido durante o meu estágio na Superintendên
 
 As seguintes ferramentas foram usadas na construção do projeto:
 
-#### **Server**  ([Firebase](https://firebase.google.com/))
-#### **Sensor Temperatura**  ([DS18B20](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf))
-#### **NodeMCU ESP8266**  ([NodeMCU ESP8266](https://components101.com/development-boards/nodemcu-esp8266-pinout-features-and-datasheet))
+##### **Server**  ([Firebase](https://firebase.google.com/))
+##### **Sensor Temperatura**  ([DS18B20](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf))
+##### **NodeMCU ESP8266**  ([NodeMCU ESP8266](https://components101.com/development-boards/nodemcu-esp8266-pinout-features-and-datasheet))
 
-#### **Utilitários**
+##### **Utilitários**
 -   Editor:  **[Visual Studio Code](https://code.visualstudio.com/)**  → Extensions:  **[Arduino](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino)**
 
 ---
@@ -47,16 +48,13 @@ As seguintes ferramentas foram usadas na construção do projeto:
 Bibliotecas utilizadas no projeto:
 
 ### E-mail
-- #### **ESP8266SMTP.h & ESP8266SMTP.cpp**  ([ESP8266SMTP](https://github.com/CosmicBoris/ESP8266SMTP/tree/master/src))
+- ##### **ESP8266SMTP.h & ESP8266SMTP.cpp**  ([ESP8266SMTP](https://github.com/CosmicBoris/ESP8266SMTP/tree/master/src))
 
 ### Sensor de temperatura
-- #### **OneWire**  ([OneWire](https://blogmasterwalkershop.com.br/arquivos/libs/OneWire.zip))
-- #### **DallasTemperature**  ([DallasTemperature](https://blogmasterwalkershop.com.br/arquivos/libs/DallasTemperature.zip))
+- ##### **OneWire**  ([OneWire](https://blogmasterwalkershop.com.br/arquivos/libs/OneWire.zip))
+- ##### **DallasTemperature**  ([DallasTemperature](https://blogmasterwalkershop.com.br/arquivos/libs/DallasTemperature.zip))
 
 ### ESP8266
-- #### **ESP8266WiFi**  ([ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi))
+- ##### **ESP8266WiFi**  ([ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi))
 ### Firebase-ESP8266
-- #### **Firebase-ESP8266**  ([Firebase-ESP8266](https://github.com/mobizt/Firebase-ESP8266))
-
-
-
+- ##### **Firebase-ESP8266**  ([Firebase-ESP8266](https://github.com/mobizt/Firebase-ESP8266))
