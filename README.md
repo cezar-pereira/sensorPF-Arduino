@@ -12,7 +12,7 @@
 
 ## 💻 Sobre o projeto
 
-TempSensor - é um projeto desenvolvido durante o meu estágio na Superintendência Regional em Alagoas - Polícia Federal que tem como propósito monitorar a temperatura da sala do servidor e alertar por e-mail e enviar as temperaturas para o servidor (Firebase) para serem lidas por outro sistema.
+TempSensor - é um projeto desenvolvido durante o meu estágio na Superintendência Regional em Alagoas - Polícia Federal que tem como propósito monitorar a temperatura da sala do servidor e alertar por e-mail e enviar as temperaturas para o servidor (Firebase) para serem lidas por outro [sistema](https://github.com/cezar-pereira/sensorPF).
 
 ---
 
