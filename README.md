@@ -5,7 +5,7 @@
 <p align="center">
  <a href="#-sobre-o-projeto">Sobre</a> •
  <a href="#-funcionalidades">Funcionalidades</a> •
- <a href="#-tecnologias">Tecnologias</a> 
+ <a href="#-tecnologias">Tecnologias</a> •
  <a href="#-Bibliotecas">Bibliotecas</a> 
 </p>
 
@@ -48,7 +48,7 @@ As seguintes ferramentas foram usadas na construção do projeto:
 Bibliotecas utilizadas no projeto:
 
 ### E-mail
-- ##### **ESP8266SMTP.h & ESP8266SMTP.cpp**  ([ESP8266SMTP](https://github.com/CosmicBoris/ESP8266SMTP/tree/master/src))
+- ##### **EMailSender**  ([EMailSender](https://github.com/xreef/EMailSender))
 
 ### Sensor de temperatura
 - ##### **OneWire**  ([OneWire](https://blogmasterwalkershop.com.br/arquivos/libs/OneWire.zip))
